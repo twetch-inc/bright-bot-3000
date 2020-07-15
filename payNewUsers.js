@@ -3,7 +3,7 @@ const axios = require('axios');
 var options = {clientIdentifier: '3aa07813-f027-4a80-8834-4913c1a23c9d'}, totalUsers = 0, prevUsers = 0;
 const twetch = new Twetch(options);
 var acornStack = createWallet(''); // insert private key here
-var amount = "$0.03";
+var amount = "$0.03", ms = 10000; // configure amounts and ms time
 function createWallet(key) {
     let opts = options;
     opts.privateKey = key;
@@ -28,17 +28,6 @@ async function post(instance, content, reply, branch, filesURL, tweet, hide) {
 async function auth() {
     const token = await twetch.authenticate();
     return token;
-}
-async function currentUserCount() {
-    let response = await twetch.query(`
-    {
-        allUsers {
-          totalCount
-        }
-    }`);
-    totalUsers = response.allUsers.totalCount;
-    console.log(totalUsers);
-    return totalUsers;
 }
 async function getNewUsers(first) {
     if (!first){prevUsers = totalUsers}
@@ -67,4 +56,4 @@ async function getNewUsers(first) {
     }
 }
 auth();getNewUsers(true);
-setInterval(getNewUsers, 10000, false);
+setInterval(getNewUsers, ms, false);
