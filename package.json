@@ -10,7 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@twetch/sdk": "^0.2.6",
-    "axios": "^0.19.2"
+    "@twetch/sdk": "0.2.8",
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.5"
   }
 }
