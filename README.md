@@ -1,6 +1,9 @@
 # Bright Bot 3000
 
-Usage:
+/pay new twetch users $0.03
+
+
+## Usage:
 
 ```
 npm install
