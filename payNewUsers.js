@@ -29,6 +29,9 @@ async function auth() {
     const token = await twetch.authenticate();
     return token;
 }
+function sleep(timeout) {
+    return new Promise(resolve => setTimeout(resolve, timeout))
+}
 async function getNewUsers(first) {
     if (!first){prevUsers = totalUsers}
     let response = await twetch.query(`
@@ -55,5 +58,11 @@ async function getNewUsers(first) {
         }
     }
 }
-auth();getNewUsers(true);
-setInterval(getNewUsers, ms, false);
+async function main(){
+    auth();getNewUsers(true);await sleep(10*ms);
+    while(true){
+        await getNewUsers(false);
+        await sleep(10*ms);
+    }
+}
+main();
