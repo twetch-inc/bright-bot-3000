@@ -1,9 +1,9 @@
 const Twetch = require('@twetch/sdk');
-const axios = require('axios');
-var options = {clientIdentifier: ''}, totalUsers = 0, prevUsers = 0;
+require('dotenv').config();
+var options = {clientIdentifier: process.env.clientIdentifier}, totalUsers = 0, prevUsers = 0;
 const twetch = new Twetch(options);
-var acornStack = createWallet(''); // insert private key here
-var amount = "$0.03", ms = 10000; // configure amounts and ms time
+var wallet = createWallet(process.env.privKey); // insert private key here
+var amount = process.env.payAmount, ms = process.env.ms; // configure amounts and ms time
 function createWallet(key) {
     let opts = options;
     opts.privateKey = key;
@@ -23,7 +23,7 @@ async function post(instance, content, reply, branch, filesURL, tweet, hide) {
             hideTweetFromTwetchLink: hide
         }
     });
-    //console.log(response.txid);
+    return response.txid;
 }
 async function auth() {
     const token = await twetch.authenticate();
@@ -50,8 +50,8 @@ async function getNewUsers(first) {
         }`);
         let users = res.allUsers.nodes;
         for (let i = 0; i<users.length; i++){
-            post(acornStack, `/pay @${users[i].id} ${amount} for joining Twetch!`, '', '', '');
-            console.log(`/pay @${users[i].id} ${amount} for joining Twetch!`);
+            let txid = post(wallet, `/pay @${users[i].id} ${amount} for joining Twetch!`, '', '', '');
+            console.log(`/pay @${users[i].id} ${amount} for joining Twetch!`, `TXID: ${txid}`);
         }
     }
 }
