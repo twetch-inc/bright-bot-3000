@@ -61,7 +61,7 @@ async function getNewUsers(first) {
 async function main(){
     auth();getNewUsers(true);
     while(true){
-        await sleep(10*ms);
+        await sleep(ms);
         await getNewUsers(false);
     }
 }
