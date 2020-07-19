@@ -59,10 +59,10 @@ async function getNewUsers(first) {
     }
 }
 async function main(){
-    auth();getNewUsers(true);await sleep(10*ms);
+    auth();getNewUsers(true);
     while(true){
-        await getNewUsers(false);
         await sleep(10*ms);
+        await getNewUsers(false);
     }
 }
 main();
