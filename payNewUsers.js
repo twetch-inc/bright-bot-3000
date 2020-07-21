@@ -42,8 +42,8 @@ async function getNewUsers(first) {
     }`);
 	totalUsers = response.allUsers.totalCount;
 	console.log(totalUsers);
-	if (!first && totalUsers === prevUsers) {
-		let newUsers = totalUsers - prevUsers; newUsers = 3;
+	if (!first && totalUsers > prevUsers) {
+		let newUsers = totalUsers - prevUsers;
 		let res = await twetch.query(`{
             allUsers(last: ${newUsers}) {
               nodes {
@@ -64,11 +64,10 @@ async function checkIfPaid(userId, amount){
             transaction
           }
         }
-    }`); 
-    let paidTx = res.allPosts.nodes[0].transaction;
-    if (!paidTx){
+    }`);
+    if (res.allPosts.nodes === []){
         let txid = await post(wallet, `/pay @${userId} ${amount} for joining Twetch!`, '', '', '');
-        console.log(`/pay @${users[i].id} ${amount} for joining Twetch!`, `TXID: ${txid}`);
+        console.log(`/pay @${userId} ${amount} for joining Twetch!`, `TXID: ${txid}`);
     }
 }
 async function main(){
