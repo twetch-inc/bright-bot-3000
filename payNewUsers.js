@@ -53,9 +53,21 @@ async function getNewUsers(first) {
         }`);
         let users = res.allUsers.nodes;
         for (let i = 0; i<users.length; i++){
-            let txid = await post(wallet, `/pay @${users[i].id} ${amount} for joining Twetch!`, '', '', '');
-            console.log(`/pay @${users[i].id} ${amount} for joining Twetch!`, `TXID: ${txid}`);
+            await checkIfPaid(users[i].id, amount);
         }
+    }
+}
+async function checkIfPaid(userId, amount){
+    let res = await twetch.query(`{
+        allPosts(last: 1, filter: {bContent: {startsWith: "/pay @${userId}"}, userId: {equalTo: "15409"}}) {
+          nodes {
+            transaction
+          }
+        }
+    }`);
+    if (res.allPosts.nodes === []){
+        let txid = await post(wallet, `/pay @${userId} ${amount} for joining Twetch!`, '', '', '');
+        console.log(`/pay @${userId} ${amount} for joining Twetch!`, `TXID: ${txid}`);
     }
 }
 async function main(){
