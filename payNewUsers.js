@@ -62,7 +62,7 @@ async function getNewUsers(first) {
 		console.log({ users });
 
 		for (let each of users) {
-			await checkIfPaid(user.id, amount);
+			await checkIfPaid(each.id, amount);
 		}
 	}
 }
