@@ -36,20 +36,21 @@ function sleep(timeout) {
 	return new Promise((resolve) => setTimeout(resolve, timeout));
 }
 async function getNewUsers(first) {
-	if (!first) {
-		prevUsers = totalUsers;
-	}
-	let response = await twetch.query(`
+	try {
+		if (!first) {
+			prevUsers = totalUsers;
+		}
+		let response = await twetch.query(`
     {
         allUsers {
           totalCount
         }
     }`);
-	totalUsers = response.allUsers.totalCount;
-	console.log(totalUsers);
-	if (!first && totalUsers > prevUsers) {
-		let newUsers = totalUsers - prevUsers;
-		let res = await twetch.query(`{
+		totalUsers = response.allUsers.totalCount;
+		console.log(totalUsers);
+		if (!first && totalUsers > prevUsers) {
+			let newUsers = totalUsers - prevUsers;
+			let res = await twetch.query(`{
             allUsers(last: ${newUsers}) {
               nodes {
                 id
@@ -57,14 +58,17 @@ async function getNewUsers(first) {
             }
         }`);
 
-		let users = res.allUsers.nodes;
+			let users = res.allUsers.nodes;
 
-		console.log({ users });
+			console.log({ users });
 
-		for (let each of users) {
-			await checkIfPaid(each.id, amount);
+			for (let each of users) {
+				try {
+					await checkIfPaid(each.id, amount);
+				} catch (e) {}
+			}
 		}
-	}
+	} catch (e) {}
 }
 async function checkIfPaid(userId, amount) {
 	let res = await twetch.query(`{
