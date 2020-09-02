@@ -1,0 +1,174 @@
+require('dotenv').config();
+const Twetch = require('@twetch/sdk');
+var options = {clientIdentifier: process.env.clientIdentifier, privateKey: process.env.privKey};
+const twetch = new Twetch(options);
+var totalFR = 0, totalDark = 0, totalAdv = 0, totalTW = 0;
+const frCount = async() => {
+    let res = await twetch.query(`{
+        allFeatureRequestPayments {
+          totalCount
+        }
+    }`);
+    totalFR = res.allFeatureRequestPayments.totalCount;
+    console.log('Total feature request payments: ', totalFR);
+    return totalFR;
+}
+const darkModeCount = async() => {
+    let res = await twetch.query(`{
+        allUsers(filter: {purchasedDarkModeAt: {isNull: false}}) {
+            totalCount
+        }
+    }`);
+    totalDark = res.allUsers.totalCount;
+    console.log('Total dark mode: ', totalDark);
+    return totalDark;
+}
+const advSearchCount = async() => {
+    let res = await twetch.query(`{
+        allUsers(filter: {purchasedAdvancedSearchAt: {isNull: false}}) {
+            totalCount
+        }
+    }`);
+    totalAdv = res.allUsers.totalCount;
+    console.log('Total advanced search purchases: ', totalAdv);
+    return totalAdv;
+}
+const twToTwCount = async() => {
+    let res = await twetch.query(`{
+        allUsers(filter: {purchasedTwetchToTweetAt: {isNull: false}}) {
+            totalCount
+        }
+    }`);
+    totalTW = res.allUsers.totalCount;
+    console.log('Total twetch to tweet purchases: ', totalTW);
+    return totalTW;
+}
+const getNewFR = async() => {
+    let prevPayments = totalFR;
+    totalFR = await frCount();
+    let newPayments = totalFR - prevPayments;
+    if (newPayments > 0) {
+        let res = await twetch.query(`{
+            allFeatureRequestPayments(last: ${newPayments}, orderBy: CREATED_AT_ASC) {
+                nodes {
+                    userId
+                    featureRequestByFeatureRequestId {
+                        title
+                    }
+                }
+            }
+        }`);
+        let funders = res.allFeatureRequestPayments.nodes;
+        if (funders.length > 0) {
+            for (let i=0; i<funders.length; i++) {
+                console.log(funders[i]);
+                let feature = funders[i].featureRequestByFeatureRequestId.title;
+                let content = `Thank you @${funders[i].userId} for funding the ${feature} feature, we're on it!
+
+https://twetch.app/features`;
+                console.log(content);
+                await post(twetch, content);
+                await sleep(10000);
+            }
+        }
+    }
+}
+const getNewAdv = async() => {
+    let prevPayments = totalAdv;
+    totalAdv = await advSearchCount();
+    let newPayments = totalAdv - prevPayments;
+    if (newPayments > 0) {
+        let res = await twetch.query(`{
+            allUsers(filter: {purchasedAdvancedSearchAt: {isNull: false}}, last: ${newPayments}, orderBy: PURCHASED_ADVANCED_SEARCH_AT_ASC) {
+              nodes {
+                id
+              }
+            }
+        }`);
+        let funders = res.allUsers.nodes;
+        if (funders.length > 0) {
+            for (let i=0; i<funders.length; i++) {
+                console.log(funders[i]);
+                let content = `Thank you @${funders[i].id} for purchasing Advanced Search!`;
+                console.log(content);
+                await post(twetch, content);
+                await sleep(10000);
+            }
+        }
+    }
+}
+const getNewDark = async() => {
+    let prevPayments = totalDark;
+    totalDark = await darkModeCount();
+    let newPayments = totalDark - prevPayments;
+    if (newPayments > 0) {
+        let res = await twetch.query(`{
+            allUsers(filter: {purchasedDarkModeAt: {isNull: false}}, last: ${newPayments}, orderBy: PURCHASED_DARK_MODE_AT_ASC) {
+              nodes {
+                id
+              }
+            }
+        }`);
+        let funders = res.allUsers.nodes;
+        if (funders.length > 0) {
+            for (let i=0; i<funders.length; i++) {
+                console.log(funders[i]);
+                let content = `Thank you @${funders[i].id} for purchasing Dark Mode!`;
+                console.log(content);
+                await post(twetch, content);
+                await sleep(10000);
+            }
+        }
+    }
+}
+const getNewTW = async() => {
+    let prevPayments = totalTW;
+    totalTW = await twToTwCount();
+    let newPayments = totalTW - prevPayments;
+    if (newPayments > 0) {
+        let res = await twetch.query(`{
+            allUsers(filter: {purchasedTwetchToTweetAt: {isNull: false}}, last: ${newPayments}, orderBy: PURCHASED_TWETCH_TO_TWEET_AT_ASC) {
+              nodes {
+                id
+              }
+            }
+        }`);
+        let funders = res.allUsers.nodes;
+        if (funders.length > 0) {
+            for (let i=0; i<funders.length; i++) {
+                console.log(funders[i]);
+                let content = `Thank you @${funders[i].id} for purchasing Twetch to Tweet!`;
+                console.log(content);
+                await post(twetch, content);
+                await sleep(10000);
+            }
+        }
+    }
+}
+const post = async(instance, content) => {
+    let response = await instance.publish('twetch/post@0.0.1', {
+        bContent: `${content}`
+    });
+    console.log('txid: ', response.txid);
+    return response.txid;
+}
+const sleep = (timeout) => {
+    return new Promise(resolve => setTimeout(resolve, timeout))
+}
+const main = async() => {
+    await frCount();
+    await advSearchCount();
+    await darkModeCount();
+    await twToTwCount();
+    while (true) {
+        await sleep(120000);
+        await getNewFR();
+        await sleep(120000);
+        await getNewAdv();
+        await sleep(120000);
+        await getNewDark();
+        await sleep(120000);
+        await getNewTW();
+    }
+}
+main();
