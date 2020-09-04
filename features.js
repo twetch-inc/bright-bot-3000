@@ -2,7 +2,7 @@ require('dotenv').config();
 const Twetch = require('@twetch/sdk');
 var options = {clientIdentifier: process.env.clientIdentifier, privateKey: process.env.privKey};
 const twetch = new Twetch(options);
-var totalFR = 0, totalDark = 0, totalAdv = 0, totalTW = 0;
+var totalFR = 0, totalDark = 0, totalAdv = 0, totalTW = 0, totalChat;
 const frCount = async() => {
     let res = await twetch.query(`{
         allFeatureRequestPayments {
@@ -42,6 +42,16 @@ const twToTwCount = async() => {
     totalTW = res.allUsers.totalCount;
     console.log('Total twetch to tweet purchases: ', totalTW);
     return totalTW;
+}
+const chatCount = async() => {
+    let res = await twetch.query(`{
+        allUsers(filter: {purchasedChatAt: {isNull: false}}) {
+          totalCount
+        }
+    }`);
+    totalChat = res.allUsers.totalCount;
+    console.log('Total Twetch Chat purchases: ', totalChat);
+    return totalChat;
 }
 const getNewFR = async() => {
     let prevPayments = totalFR;
@@ -145,6 +155,31 @@ const getNewTW = async() => {
         }
     }
 }
+const getNewChat = async() => {
+    let prevPayments = totalChat;
+    totalChat = await chatCount();
+    let newPayments = totalChat - prevPayments;
+    if (newPayments > 0) {
+        let res = await twetch.query(`{
+            allUsers(filter: {purchasedChatAt: {isNull: false}}, last: ${newPayments}, orderBy: PURCHASED_CHAT_AT_ASC) {
+              totalCount
+              nodes {
+                id
+              }
+            }
+        }`);
+        let funders = res.allUsers.nodes;
+        if (funders.length > 0) {
+            for (let i=0; i<funders.length; i++) {
+                console.log(funders[i]);
+                let content = `Thank you @${funders[i].id} for purchasing Twetch Chat!`;
+                console.log(content);
+                await post(twetch, content);
+                await sleep(10000);
+            }
+        }
+    }
+}
 const post = async(instance, content) => {
     let response = await instance.publish('twetch/post@0.0.1', {
         bContent: `${content}`
@@ -160,6 +195,7 @@ const main = async() => {
     await advSearchCount();
     await darkModeCount();
     await twToTwCount();
+    await chatCount();
     while (true) {
         await sleep(120000);
         await getNewFR();
@@ -169,6 +205,8 @@ const main = async() => {
         await getNewDark();
         await sleep(120000);
         await getNewTW();
+        await sleep(12000);
+        await getNewChat();
     }
 }
 main();
