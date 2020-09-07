@@ -62,6 +62,7 @@ const getNewFR = async() => {
             allFeatureRequestPayments(last: ${newPayments}, orderBy: CREATED_AT_ASC) {
                 nodes {
                     userId
+                    amount
                     featureRequestByFeatureRequestId {
                         title
                     }
@@ -72,13 +73,17 @@ const getNewFR = async() => {
         if (funders.length > 0) {
             for (let i=0; i<funders.length; i++) {
                 console.log(funders[i]);
-                let feature = funders[i].featureRequestByFeatureRequestId.title;
-                let content = `Thank you @${funders[i].userId} for funding the ${feature} feature, we're on it!
+                let amount = funders[i].amount;
+                let usdAmount = await twetch.bsvPrice() * amount;
+                if (usdAmount > 0.009) {
+                    let feature = funders[i].featureRequestByFeatureRequestId.title;
+                    let content = `Thank you @${funders[i].userId} for funding the ${feature} feature, we're on it!
 
 https://twetch.app/features`;
-                console.log(content);
-                await post(twetch, content);
-                await sleep(10000);
+                    console.log(content);
+                    await post(twetch, content);
+                    await sleep(10000);
+                }
             }
         }
     }
