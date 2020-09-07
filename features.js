@@ -205,7 +205,7 @@ const main = async() => {
         await getNewDark();
         await sleep(120000);
         await getNewTW();
-        await sleep(12000);
+        await sleep(120000);
         await getNewChat();
     }
 }
