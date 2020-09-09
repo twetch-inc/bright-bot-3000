@@ -177,7 +177,9 @@ const getNewChat = async() => {
         if (funders.length > 0) {
             for (let i=0; i<funders.length; i++) {
                 console.log(funders[i]);
-                let content = `Thank you @${funders[i].id} for purchasing Twetch Chat!`;
+                let content = `Thank you @${funders[i].id} for purchasing Twetch Chat!
+
+Get Twetch Chat here 👇 https://twetch.app/chat/buy?r=3aa07813-f027-4a80-8834-4913c1a23c9d`;
                 console.log(content);
                 await post(twetch, content);
                 await sleep(10000);
