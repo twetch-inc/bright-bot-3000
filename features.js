@@ -81,8 +81,10 @@ const getNewFR = async() => {
 
 https://twetch.app/features`;
                     console.log(content);
-                    await post(twetch, content);
-                    await sleep(10000);
+                    let tx = await post(twetch, content);
+                    if (tx && i < funders.length-1) {
+                        await sleep(10000);
+                    }
                 }
             }
         }
@@ -106,8 +108,10 @@ const getNewAdv = async() => {
                 console.log(funders[i]);
                 let content = `Thank you @${funders[i].id} for purchasing Advanced Search!`;
                 console.log(content);
-                await post(twetch, content);
-                await sleep(10000);
+                let tx = await post(twetch, content);
+                if (tx && i < funders.length-1) {
+                    await sleep(10000);
+                }
             }
         }
     }
@@ -130,8 +134,10 @@ const getNewDark = async() => {
                 console.log(funders[i]);
                 let content = `Thank you @${funders[i].id} for purchasing Dark Mode!`;
                 console.log(content);
-                await post(twetch, content);
-                await sleep(10000);
+                let tx = await post(twetch, content);
+                if (tx && i < funders.length-1) {
+                    await sleep(10000);
+                }
             }
         }
     }
@@ -154,8 +160,10 @@ const getNewTW = async() => {
                 console.log(funders[i]);
                 let content = `Thank you @${funders[i].id} for purchasing Twetch to Tweet!`;
                 console.log(content);
-                await post(twetch, content);
-                await sleep(10000);
+                let tx = await post(twetch, content);
+                if (tx && i < funders.length-1) {
+                    await sleep(10000);
+                }
             }
         }
     }
@@ -177,20 +185,32 @@ const getNewChat = async() => {
         if (funders.length > 0) {
             for (let i=0; i<funders.length; i++) {
                 console.log(funders[i]);
-                let content = `Thank you @${funders[i].id} for purchasing Twetch Chat!`;
+                let content = `Thank you @${funders[i].id} for purchasing Twetch Chat!
+
+Get Twetch Chat here 👇
+https://twetch.app/chat/buy?r=3aa07813-f027-4a80-8834-4913c1a23c9d`;
                 console.log(content);
-                await post(twetch, content);
-                await sleep(10000);
+                let tx = await post(twetch, content);
+                if (tx && i < funders.length-1) {
+                    await sleep(10000);
+                }
             }
         }
     }
 }
-const post = async(instance, content) => {
-    let response = await instance.publish('twetch/post@0.0.1', {
-        bContent: `${content}`
-    });
-    console.log('txid: ', response.txid);
-    return response.txid;
+const post = async(instance, content, retries = 2) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            let response = await instance.publish('twetch/post@0.0.1', {
+                bContent: `${content}`
+            });
+            console.log('txid: ', response.txid);
+            return response.txid;
+        }
+        catch (e) {
+            console.log(e); // log error and try again
+        }
+    }
 }
 const sleep = (timeout) => {
     return new Promise(resolve => setTimeout(resolve, timeout))
@@ -202,15 +222,15 @@ const main = async() => {
     await twToTwCount();
     await chatCount();
     while (true) {
-        await sleep(120000);
+        await sleep(90000);
         await getNewFR();
-        await sleep(120000);
+        await sleep(90000);
         await getNewAdv();
-        await sleep(120000);
+        await sleep(90000);
         await getNewDark();
-        await sleep(120000);
+        await sleep(90000);
         await getNewTW();
-        await sleep(120000);
+        await sleep(90000);
         await getNewChat();
     }
 }
