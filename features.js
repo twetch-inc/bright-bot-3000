@@ -158,7 +158,7 @@ const getNewTW = async() => {
         if (funders.length > 0) {
             for (let i=0; i<funders.length; i++) {
                 console.log(funders[i]);
-                let content = `Thank you @${funders[i].id} for purchasing Twetch to Tweet!`;
+                let content = `Thank you @${funders[i].id} for purchasing Tweet from Twetch!`;
                 console.log(content);
                 let tx = await post(twetch, content);
                 if (tx && i < funders.length-1) {
