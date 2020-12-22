@@ -3,6 +3,29 @@ const Twetch = require('@twetch/sdk');
 var options = {clientIdentifier: process.env.clientIdentifier, privateKey: process.env.privKey};
 const twetch = new Twetch(options);
 var totalFR = 0, totalDark = 0, totalAdv = 0, totalTW = 0, totalChat;
+const initTwetch = (key, cliId) => {
+	let clientIdentifier = cliId !== undefined ? cliId : process.env.clientIdentifier;
+    const twetch = new Twetch({ clientIdentifier, privateKey: key });
+    return twetch;
+}
+const build = async (instance, content) => {
+	try {
+		let abiRes = await instance.build('twetch/post@0.0.1', {
+			bContent: `${content}`,
+		});
+		const contentHash = abiRes.abi.contentHash();
+		let address = instance.wallet.address();
+		signature = instance.wallet.sign(contentHash);
+		let output = abiRes.abi.args;
+		output[output.length - 1] = signature;
+		output[output.length - 2] = address;
+		return {output: output, payees: abiRes.payees};
+	}
+	catch(e) {
+		console.log(e);
+		return null;
+	}
+}
 const frCount = async() => {
     let res = await twetch.query(`{
         allFeatureRequestPayments {
@@ -83,7 +106,7 @@ const getNewFR = async() => {
 
     https://twetch.app/features${feature.id === '9f0da5cf-9657-42d7-b7c1-83d2d41d7c7f' ? '/mobile-app' : ''}`;
                         console.log(content);
-                        let tx = await post(twetch, content);
+                        let tx = await post(content);
                         if (tx && i < funders.length-1) {
                             await sleep(10000);
                         }
@@ -116,7 +139,7 @@ const getNewAdv = async() => {
                     console.log(funders[i]);
                     let content = `Thank you @${funders[i].id} for purchasing Advanced Search!`;
                     console.log(content);
-                    let tx = await post(twetch, content);
+                    let tx = await post(content);
                     if (tx && i < funders.length-1) {
                         await sleep(10000);
                     }
@@ -148,7 +171,7 @@ const getNewDark = async() => {
                     console.log(funders[i]);
                     let content = `Thank you @${funders[i].id} for purchasing Dark Mode!`;
                     console.log(content);
-                    let tx = await post(twetch, content);
+                    let tx = await post(content);
                     if (tx && i < funders.length-1) {
                         await sleep(10000);
                     }
@@ -180,7 +203,7 @@ const getNewTW = async() => {
                     console.log(funders[i]);
                     let content = `Thank you @${funders[i].id} for purchasing Tweet from Twetch!`;
                     console.log(content);
-                    let tx = await post(twetch, content);
+                    let tx = await post(content);
                     if (tx && i < funders.length-1) {
                         await sleep(10000);
                     }
@@ -216,7 +239,7 @@ const getNewChat = async() => {
     Get Twetch Chat here 👇
     https://twetch.app/chat/buy?r=3aa07813-f027-4a80-8834-4913c1a23c9d`;
                     console.log(content);
-                    let tx = await post(twetch, content);
+                    let tx = await post(content);
                     if (tx && i < funders.length-1) {
                         await sleep(10000);
                     }
@@ -229,14 +252,26 @@ const getNewChat = async() => {
         return;
     }
 }
-const post = async(instance, content, retries = 2) => {
+const post = async(content, retries = 2) => {
+    const signer = initTwetch(process.env.privKey); // can change to signing key for Twetch account
+    const built = await build(signer, content);
+    const payees = (built.payees || [])
+        .filter((e) => e.types.includes('mention')) // remove twetch outputs
+        .filter((e) => e.amount < 0.0002); // remove outputs greater than
+    
+    const funder = initTwetch(process.env.privKey);
+
     for (let i = 0; i < retries; i++) {
         try {
-            let response = await instance.publish('twetch/post@0.0.1', {
-                bContent: `${content}`
+            let tx = await funder.wallet.buildTx(built.output, payees);
+            console.log(tx.toString());
+            await funder.publishRequest({
+                signed_raw_tx: tx.toString(),
+				action: 'twetch/post@0.0.1',
+                broadcast: true
             });
-            console.log('txid: ', response.txid);
-            return response.txid;
+            console.log(`TXID: ${tx.hash}`);
+            return tx.hash;
         }
         catch (e) {
             console.log(e); // log error and try again
