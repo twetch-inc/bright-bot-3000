@@ -137,7 +137,10 @@ const getNewAdv = async() => {
             if (funders.length > 0) {
                 for (let i=0; i<funders.length; i++) {
                     console.log(funders[i]);
-                    let content = `Thank you @${funders[i].id} for purchasing Advanced Search!`;
+                    let content = `Thank you @${funders[i].id} for purchasing Advanced Search!
+                    
+Get Advanced Search here 👇
+https://twetch.app/settings`;
                     console.log(content);
                     let tx = await post(content);
                     if (tx && i < funders.length-1) {
@@ -169,7 +172,10 @@ const getNewDark = async() => {
             if (funders.length > 0) {
                 for (let i=0; i<funders.length; i++) {
                     console.log(funders[i]);
-                    let content = `Thank you @${funders[i].id} for purchasing Dark Mode!`;
+                    let content = `Thank you @${funders[i].id} for purchasing Dark Mode!
+                    
+Get Dark Mode here 👇
+https://twetch.app/settings`;
                     console.log(content);
                     let tx = await post(content);
                     if (tx && i < funders.length-1) {
@@ -201,7 +207,10 @@ const getNewTW = async() => {
             if (funders.length > 0) {
                 for (let i=0; i<funders.length; i++) {
                     console.log(funders[i]);
-                    let content = `Thank you @${funders[i].id} for purchasing Tweet from Twetch!`;
+                    let content = `Thank you @${funders[i].id} for purchasing Tweet from Twetch!
+                    
+Get Tweet from Twetch here 👇
+https://twetch.app/settings`;
                     console.log(content);
                     let tx = await post(content);
                     if (tx && i < funders.length-1) {
