@@ -255,15 +255,11 @@ const getNewChat = async() => {
 const post = async(content, retries = 2) => {
     const signer = initTwetch(process.env.privKey); // can change to signing key for Twetch account
     const built = await build(signer, content);
-    const payees = (built.payees || [])
-        .filter((e) => e.types.includes('mention')) // remove twetch outputs
-        .filter((e) => e.amount < 0.0002); // remove outputs greater than
-    
     const funder = initTwetch(process.env.privKey);
 
     for (let i = 0; i < retries; i++) {
         try {
-            let tx = await funder.wallet.buildTx(built.output, payees);
+            let tx = await funder.wallet.buildTx(built.output, built.payees);
             console.log(tx.toString());
             await funder.publishRequest({
                 signed_raw_tx: tx.toString(),
