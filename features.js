@@ -112,9 +112,11 @@ const getNewFR = async () => {
     https://twetch.app/features${
 			feature.id === '9f0da5cf-9657-42d7-b7c1-83d2d41d7c7f' ? '/mobile-app' : ''
 		}`;
-						console.log(content);
-
 						if (feature.id === '6a22c362-2ad8-4221-8cb6-102d8c980559') {
+							content = `Thank you @${funders[i].userId} for purchasing the first ever tokenized hat on bitcoin! We will get this shipped to you ASAP. 
+
+Our supply is running out, get your hat before it’s too late! 👇
+https://twetch.app/hat`;
 							continue;
 						}
 
