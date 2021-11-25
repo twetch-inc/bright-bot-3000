@@ -10,8 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@twetch/sdk": "^0.2.8",
-    "dotenv": "^8.2.0"
+    "@twetch/sdk": "0.2.8",
+    "dotenv": "^8.2.0",
+    "isomorphic-fetch": "^3.0.0"
   },
   "devDependencies": {
     "prettier": "^2.2.1"
