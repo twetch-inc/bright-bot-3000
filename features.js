@@ -99,7 +99,7 @@ const main = async () => {
 				for (let i = 0; i < diff; i++) {
 					let item = sold[i];
 
-					let txId = item.txid;
+					let txId = item.spent;
 					let dolPrice, bsvPrice;
 					let price = item.price;
 					let currency = item.currency;
