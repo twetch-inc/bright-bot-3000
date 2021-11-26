@@ -32,31 +32,39 @@ const build = async (instance, content) => {
 };
 
 const lastSold = async () => {
-	console.log(`checking for new entries at ${new Date().toISOString()}`);
-	let res = await fetch('https://twonks.twetch.app/market/sold?orderBy=created%20desc');
-	let lastSold = await res.json();
-	return lastSold;
+	try {
+		console.log(`checking for new entries at ${new Date().toISOString()}`);
+		let res = await fetch('https://twonks.twetch.app/market/sold?orderBy=created%20desc');
+		let lastSold = await res.json();
+		return lastSold;
+	} catch (e) {
+		console.log(e);
+	}
 };
 
 const post = async (content, retries = 2) => {
-	const signer = initTwetch(process.env.privKey); // can change to signing key for Twetch account
-	const built = await build(signer, content);
-	const funder = initTwetch(process.env.privKey);
+	try {
+		const signer = initTwetch(process.env.privKey); // can change to signing key for Twetch account
+		const built = await build(signer, content);
+		const funder = initTwetch(process.env.privKey);
 
-	for (let i = 0; i < retries; i++) {
-		try {
-			let tx = await funder.wallet.buildTx(built.output, built.payees);
-			console.log(tx.toString());
-			await funder.publishRequest({
-				signed_raw_tx: tx.toString(),
-				action: 'twetch/post@0.0.1',
-				broadcast: true,
-			});
-			console.log(`TXID: ${tx.hash}`);
-			return tx.hash;
-		} catch (e) {
-			console.log(e); // log error and try again
+		for (let i = 0; i < retries; i++) {
+			try {
+				let tx = await funder.wallet.buildTx(built.output, built.payees);
+				console.log(tx.toString());
+				await funder.publishRequest({
+					signed_raw_tx: tx.toString(),
+					action: 'twetch/post@0.0.1',
+					broadcast: true,
+				});
+				console.log(`TXID: ${tx.hash}`);
+				return tx.hash;
+			} catch (e) {
+				console.log(e); // log error and try again
+			}
 		}
+	} catch (e) {
+		console.log(e);
 	}
 };
 
@@ -69,37 +77,41 @@ const main = async () => {
 	let prevCount = sold.length;
 
 	while (true) {
-		sold = await lastSold();
-		let count = sold.length;
+		try {
+			sold = await lastSold();
+			let count = sold.length;
 
-		if (count > prevCount) {
-			prevCount = count
-			let diff = count - prevCount;
-			console.log('new entries found:', diff);
-			for (let i = 0; i < diff; i++) {
-				let item = sold[i];
+			if (count > prevCount) {
+				prevCount = count;
+				let diff = count - prevCount;
+				console.log('new entries found:', diff);
+				for (let i = 0; i < diff; i++) {
+					let item = sold[i];
 
-				let txId = item.txid;
-				let dolPrice, bsvPrice;
-				let price = item.price;
-				let currency = item.currency;
-				if (currency === 'BSV') {
-					bsvPrice = price;
-					dolPrice = parseFloat(price * exchangeRate).toFixed(2);
-				} else {
-					dolPrice = price;
-					bsvPrice = parseFloat(price / exchangeRate).toFixed(8);
+					let txId = item.txid;
+					let dolPrice, bsvPrice;
+					let price = item.price;
+					let currency = item.currency;
+					if (currency === 'BSV') {
+						bsvPrice = price;
+						dolPrice = parseFloat(price * exchangeRate).toFixed(2);
+					} else {
+						dolPrice = price;
+						bsvPrice = parseFloat(price / exchangeRate).toFixed(8);
+					}
+					let meta = JSON.parse(item.meta);
+					let obj = JSON.parse(meta);
+					let name = obj.name || obj.title;
+					let number = obj.number;
+					let twetchPost = `${name} just sold for ${bsvPrice} BSV / $ ${dolPrice} \nhttps://twetch.com/twonks/${txId}/0`;
+					post(twetchPost);
 				}
-				let meta = JSON.parse(item.meta);
-				let obj = JSON.parse(meta);
-				let name = obj.name || obj.title;
-				let number = obj.number;
-				let twetchPost = `${name} just sold for ${bsvPrice} BSV / $ ${dolPrice} \nhttps://twetch.com/twonks/${txId}/0`;
-				post(twetchPost);
 			}
+		} catch (e) {
+			console.log(e);
 		}
 
-		await sleep(10000);
+		await sleep(1000 * 60);
 	}
 };
 
