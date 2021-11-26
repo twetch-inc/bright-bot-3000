@@ -54,7 +54,12 @@ const post = async (content, retries = 2) => {
 					signed_raw_tx: tx.toString(),
 					action: 'twetch/post@0.0.1',
 					broadcast: true,
+					payParams: {
+						tweetFromTwetch: true,
+						hideTweetFromTwetchLink: true
+					}
 				});
+
 				console.log(`TXID: ${tx.hash}`);
 				return tx.hash;
 			} catch (e) {
@@ -69,6 +74,13 @@ const post = async (content, retries = 2) => {
 const sleep = (timeout) => {
 	return new Promise((resolve) => setTimeout(resolve, timeout));
 };
+
+//const testPost = () => {
+	//let twetchPost = `Frog Vision Goggles #330 just sold for 6.12 BSV / $916.00 \nhttps://twetch.com/twonks/b60edda8a8f7a9d2ee27614941b6b2cafc6223d777379c05c23bfffb237634a5/0`;
+	//post(twetchPost);
+//}
+
+//testPost()
 
 const main = async () => {
 	let sold = await lastSold();
@@ -115,4 +127,4 @@ const main = async () => {
 	}
 };
 
-main();
+//main();
