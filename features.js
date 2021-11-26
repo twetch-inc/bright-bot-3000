@@ -82,7 +82,6 @@ const main = async () => {
 			let count = sold.length;
 
 			if (count > prevCount) {
-				prevCount = count;
 				let diff = count - prevCount;
 				console.log('new entries found:', diff);
 				for (let i = 0; i < diff; i++) {
@@ -106,6 +105,7 @@ const main = async () => {
 					let twetchPost = `${name} just sold for ${bsvPrice} BSV / $ ${dolPrice} \nhttps://twetch.com/twonks/${txId}/0`;
 					post(twetchPost);
 				}
+				prevCount = count;
 			}
 		} catch (e) {
 			console.log(e);
