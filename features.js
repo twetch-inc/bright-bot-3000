@@ -4,8 +4,6 @@ const fetch = require('isomorphic-fetch');
 
 var options = { clientIdentifier: process.env.clientIdentifier, privateKey: process.env.privKey };
 const twetch = new Twetch(options);
-const helpers = twetch.Helpers;
-const exchangeRate = twetch.Helpers.exchangeRate.price;
 
 const initTwetch = (key) => {
 	let clientIdentifier = process.env.clientIdentifier;
@@ -77,11 +75,13 @@ const main = async () => {
 	let prevCount = sold.length;
 
 	while (true) {
+
 		try {
 			sold = await lastSold();
 			let count = sold.length;
 
 			if (count > prevCount) {
+				const exchangeRate = twetch.Helpers.exchangeRate.price;
 				let diff = count - prevCount;
 				console.log('new entries found:', diff);
 				for (let i = 0; i < diff; i++) {
