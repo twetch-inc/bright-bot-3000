@@ -98,6 +98,11 @@ const main = async () => {
 				console.log('new entries found:', diff);
 				for (let i = 0; i < diff; i++) {
 					let item = sold[i];
+					const address = item.address;
+
+					if (address !== '024532228a0a5679c49a8ce591474fa6e0626deb9170c287869c7fa8758763898b') {
+						continue;
+					}
 
 					let txId = item.spent;
 					let dolPrice, bsvPrice;
@@ -114,6 +119,7 @@ const main = async () => {
 					let obj = JSON.parse(meta);
 					let name = obj.name || obj.title;
 					let number = obj.number;
+
 					let twetchPost = `${name} just sold for ${bsvPrice} BSV / $ ${dolPrice} \nhttps://twetch.com/twonks/${txId}/0`;
 					post(twetchPost);
 				}
