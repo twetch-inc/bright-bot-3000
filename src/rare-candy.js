@@ -68,7 +68,7 @@ const main = async () => {
 				const usdPrice = ((parseInt(item.total_price, 10) / 1e8) * exchangeRate).toFixed(0);
 
 				const { txid, vout } = Outpoint.decode(item.outpoint);
-				const description = `${metadata.title} (${item.rarity_status}) just sold for ${price} BSV ($${usdPrice}) https://rarecandy.io/item/${item.collection}/${txid}/${vout}`;
+				const description = `${metadata.title} (${item.rarity_status}) just sold for ${bsvPrice} BSV ($${usdPrice}) https://rarecandy.io/item/${item.collection}/${txid}/${vout}`;
 				await postTwetch(twetch, description);
 			}
 		} catch (e) {
