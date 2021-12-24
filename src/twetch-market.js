@@ -60,7 +60,7 @@ const main = async () => {
 					let name = obj.name || obj.title;
 					let number = obj.number;
 
-					let twetchPost = `${name} just sold for ${bsvPrice} BSV / $ ${dolPrice} \nhttps://twetch.com/twonks/${txId}/0`;
+					let twetchPost = `${name} just sold for ${bsvPrice} BSV / ($${dolPrice}) \nhttps://twetch.com/twonks/${txId}/0`;
 					postTwetch(twetch, twetchPost);
 				}
 				prevCount = count;
