@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node features.js"
+    "start": "npm run twetch-market",
+    "rare-candy": "node src/rare-candy.js",
+    "twetch-market": "node src/twetch-market.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@twetch/sdk": "0.2.8",
+    "axios": "^0.24.0",
     "dotenv": "^8.2.0",
     "isomorphic-fetch": "^3.0.0"
   },
